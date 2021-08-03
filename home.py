@@ -1,9 +1,10 @@
 # import the Flask class from the flask module
+from re import template
 from flask import Flask, render_template, redirect, url_for, request, session, flash
 from functools import wraps
 
 # create the application object
-app = Flask(__name__)
+app = Flask(__name__,template_folder='template')
 
 # config
 app.secret_key = 'my precious'
@@ -23,10 +24,10 @@ def login_required(f):
 @app.route('/')
 @login_required
 def home():
-    return render_template('index.html')
+    return render_template('landing.html')
 
 # route for handling the login page logic
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/log_in', methods=['GET', 'POST'])
 def login():
     error = None
     if request.method == 'POST':
@@ -36,7 +37,19 @@ def login():
             session['logged_in'] = True
             flash('You were logged in.')
             return redirect(url_for('home'))
-    return render_template('login.html', error=error)
+    return render_template('log_in.html', error=error)
+
+@app.route('/reportgen', methods=['GET', 'POST'])
+@login_required
+def reportgen():
+    msg = None
+    if request.method == 'POST':
+        if "opt1" in request.form:
+            msg = 'Generating report ...'
+        if "opt2" in request.form:
+            msg = 'Downloading report ...'
+    flash(msg)
+    return render_template('reportgen.html')
 
 @app.route('/logout')
 @login_required
